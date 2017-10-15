@@ -1,0 +1,101 @@
+.dashboard {
+	margin-top: 70px;
+}
+
+.dashboard-wide {
+	width: 80%;
+}
+
+.h-container {
+	text-align: left;
+}
+
+.js-accordion__header:focus {
+	outline: 2px solid #00b1bd;
+}
+
+.ui-state-active {
+	background-color: #00b1bd;
+}
+
+h4 {
+	font-size: 1.75em; 
+}
+
+.content {
+	height: 300px;
+}
+
+.content p {
+	padding-left: 10px;
+}
+
+div.js-hospitalizations, div .questions{
+	display: inline-block;
+	vertical-align: top;
+}
+
+.js-hospitalizations input[type=text]::placeholder,
+.questions input[type=text]::placeholder {
+	font-size: 0.9em;
+}
+
+input[type=text], input[type=email], textarea {
+	background-color: inherit;
+	border: none;
+	border-bottom: 1px solid black
+}
+
+select {
+	margin-bottom: 20px;
+}
+
+.edit {
+	vertical-align: bottom;
+	margin: 15px auto 25px auto;
+}
+
+button.edit {
+	font-size: 0.85em;
+	display: block;
+}
+
+
+.new-hospitalization, .ask-questions {
+	margin-bottom: 50px;
+}
+
+.visuallyhidden { 
+	border: 0; 
+	clip: rect(0 0 0 0); 
+	height: 1px; 
+	margin: -1px; 
+	overflow: hidden; 
+	padding: 0; 
+	position: absolute; 
+	width: 1px; 
+}
+
+.conscious {
+	display: none;
+}
+
+#post-condition {
+	padding-right: 2px;
+}
+
+button.new-entry {
+	margin-top: 10px;
+}
+
+@media only screen and (min-width: 670px) {
+	div.questions {
+		float: right;
+	}
+}
+
+@media only screen and (min-width: 640px) {
+	.content {
+		height: 100%;
+	}
+}
