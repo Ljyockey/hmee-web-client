@@ -12,19 +12,30 @@ function displayMickeyData(data) {
       `<h3 class="js-accordion__header">${item.land_id}</h3>
 			<div class="js-accordion__panel content" id="${id}" data-id="${item.id}">
 				<form>
-					<div class="js-hospitalizations">
+          <div class="js-hospitalizations">
+            <label for="park"><h4>Park:</h4></label>
+						<select name="park" title="park">
+							<option value="1" ${addSelected(item.park_id, 1)}>Disneyland</option>
+              <option value="2" ${addSelected(item.park_id, 2)}>California Adventure</option>
+              <option value="3" ${addSelected(item.park_id, 3)}>Downtown Disney</option>
+            </select>
+            <label for="land"><h4>Land:</h4></label>
+            <select name="land" title="land">
+              <option value="${item.land_id}">${item.land_id}</option>
+            </select> 
+            <label for="attraction"><h4>Attraction:</h4></label>
+            <select name="attraction" title="attraction">
+              <option value="${item.attraction_id}">${item.attraction_id}</option>
+            </select>                        
 						<h4>Description</h4>
 						<p class="description">${item.description}</p>
 						<input type="text" for="description" id="description" placeholder="edit description"><br>						
 						<label for="hint"><h4>Hint</h4></label>
 						<p class="hint">${item.hint}</p>
-						<input type="text" for="hint" id="hint" placeholder="edit hint"><br>				
-						<label for="conscious"><h4>Conscious?</h4></label>
-						<select name="conscious" title="conscious">
-							<option value="yes" ${addSelected(item.conscious, true)}>yes</option>
-							<option value="no" ${addSelected(item.conscious, false)}>no</option>
-						</select>
-						<p class="conscious" aria-hidden="true">${conscious}</p>
+            <input type="text" for="hint" id="hint" placeholder="edit hint"><br>	
+						<label for="photo-url"><h4>Photo URL</h4></label>
+						<p class="photo-url">${item.photo_url}</p>
+						<input type="text" for="photo-url" id="photo-url" placeholder="edit photo URL"><br>            			
 					</div>
 					${createSubmitButton(item.id)}
 				</form>
@@ -42,11 +53,11 @@ function displayMickeyData(data) {
   }
 }
 
-function addSelected(c, bool) {
+function addSelected(parkId, n) {
   //this adds the "selected" attribute to the correct option
-  //under conscious
+  //under park/land/attraction
   var selected = 'selected';
-  if (c === bool) {
+  if (parkId === n) {
     return selected;
   }
 }
