@@ -14,16 +14,20 @@ function displayMickeyData(data) {
 				<form>
           <div class="js-hospitalizations">
             <label for="park"><h4>Park:</h4></label>
-						<select name="park" title="park">
-							<option value="1" ${addSelected(item.park_id, 1)}>Disneyland</option>
-              <option value="2" ${addSelected(item.park_id, 2)}>California Adventure</option>
-              <option value="3" ${addSelected(item.park_id, 3)}>Downtown Disney</option>
+            <p>${item.park_name}</p>
+            <select name="park" title="park">
+              <option value="none">Change Park</option>
+							<option value="1">Disneyland</option>
+              <option value="2">California Adventure</option>
+              <option value="3">Downtown Disney</option>
             </select>
             <label for="land"><h4>Land:</h4></label>
+            <p>${item.land_name}</p>
             <select name="land" title="land">
               <option value="${item.land_id}">${item.land_id}</option>
             </select> 
             <label for="attraction"><h4>Attraction:</h4></label>
+            <p>${item.attraction_name}</p>
             <select name="attraction" title="attraction">
               <option value="${item.attraction_id}">${item.attraction_id}</option>
             </select>                        
