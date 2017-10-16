@@ -1,7 +1,7 @@
 var dbUrl = 'https://hmee-api.herokuapp.com';
 
-//creates accordion with data from hospitalizations GET request
-function displayHospitalizationData(data) {
+//creates accordion with data from mickeys GET request
+function displayMickeyData(data) {
   var hDisplay = '';
   var id;
   data.mickeys.forEach(function(item) {
@@ -61,8 +61,8 @@ function checkIfConscious(item) {
   return conscious;
 }
 
-//GET hopitalizations
-function getHospitalizations(callback) {
+//GET mickeys
+function getMickeys(callback) {
   var query = {
     url: `${dbUrl}/mickeys`,
     type: 'GET',
@@ -85,27 +85,25 @@ function listenForHospitalization() {
 
     //create new object to push to array
     var newEntry = {
-      "patient": $('input[name="patient"]').val(),
-      "condition": $('input[name="condition"]').val(),
-      "latestUpdate": $('input[name="status"]').val()
+      "description": $('input[name="description"]').val(),
+      "hint": $('input[name="hint"]').val(),
+      "photo_url": $('textarea[name="photo-url"]').val(),
+      "park_id": $('select[name="park"]').value === 'none' ? null : parseInt($('select[name="park"]').val()),
+      "land_id": $('select[name="land"]').value === 'none' ? null : parseInt($('select[name="land"]').val()),
+      "attraction_id": $('select[name="attraction"]').value === 'none' ? null : parseInt($('select[name="attraction"]').val())
     };
-    if ($('input[name="conscious"]:checked').val() === 'yes') {
-      newEntry.conscious = true;
-    } else {
-      newEntry.conscious = false;
-    }
 
     //adds new object to hospitalization collection
     $.ajax({
-      url: ('/hospitalizations'),
+      url: (`${dbUrl}/mickeys`),
       type: 'POST',
       data: JSON.stringify(newEntry),
       success: function(data) {
         //update DOM with new item
         var newPost = {
-          hospitalizations: [data]
+          mickeys: [data.mickey]
         };
-        return $('.js-hospitalizations').append(displayHospitalizationData(newPost));
+        return $('.js-hospitalizations').append(displayMickeyData(newPost));
       },
       dataType: 'json',
       contentType: 'application/json'
@@ -173,11 +171,11 @@ function hUpdateDom(object) {
 }
 
 function displayAttractionOptions(data) {
-	var oHtml = '<option value="none">None</option>';
-	data.attractions.forEach(function(attraction) {
-		oHtml += `<option value="${attraction.id}">${attraction.name}</option>`;
-	});
-	$('.js-form-attractions').html(oHtml);
+  var oHtml = '<option value="none">None</option>';
+  data.attractions.forEach(function(attraction) {
+    oHtml += `<option value="${attraction.id}">${attraction.name}</option>`;
+  });
+  $('.js-form-attractions').html(oHtml);
 }
 
 function getAttractionsByLandForForm(landId, callback) {
@@ -190,17 +188,18 @@ function getAttractionsByLandForForm(landId, callback) {
 }
 
 function listenForLandChanges() {
-	$('.js-form-lands').change(function() {
-		getAttractionsByLandForForm(this.value, displayAttractionOptions);
-	});
+  $('.js-form-lands').change(function() {
+    getAttractionsByLandForForm(this.value, displayAttractionOptions);
+  });
 }
 
 function displayLandOptions(data) {
-	var oHtml = '<option value="none">None</option>';
-	data.lands.forEach(function(land) {
-		oHtml += `<option value="${land.id}">${land.name}</option>`;
-	});
-	$('.js-form-lands').html(oHtml);
+  var oHtml = '<option value="none">None</option>';
+  $('.js-form-attractions').html(oHtml);
+  data.lands.forEach(function(land) {
+    oHtml += `<option value="${land.id}">${land.name}</option>`;
+  });
+  $('.js-form-lands').html(oHtml);
 }
 
 function getLandsByParkForForm(parkId, callback) {
@@ -213,15 +212,15 @@ function getLandsByParkForForm(parkId, callback) {
 }
 
 function listenForParkChanges() {
-	$('.js-form-park').change(function() {
-		getLandsByParkForForm(this.value, displayLandOptions);
-	});
+  $('.js-form-park').change(function() {
+    getLandsByParkForForm(this.value, displayLandOptions);
+  });
 }
 
 
 
 $(function() {
-  getHospitalizations(displayHospitalizationData);
+  getMickeys(displayMickeyData);
   listenForParkChanges();
   listenForLandChanges();
   listenForHospitalization();
