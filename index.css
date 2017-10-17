@@ -46,6 +46,10 @@ input[type=text], input[type=email], textarea {
 	border-bottom: 1px solid black
 }
 
+.mickey-display-inline {
+	display: inline;
+}
+
 select {
 	margin-bottom: 20px;
 }

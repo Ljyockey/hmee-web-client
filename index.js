@@ -2,34 +2,33 @@ var dbUrl = 'https://hmee-api.herokuapp.com';
 
 //creates accordion with data from mickeys GET request
 function displayMickeyData(data) {
-  var hDisplay = '';
+  var mDisplay = '';
   var id;
   data.mickeys.forEach(function(item) {
     id = item.id;
     //turns boolean from item.conscious into yes/no string
-    var conscious = checkIfConscious(item);
-    hDisplay += (
-      `<h3 class="js-accordion__header">${item.land_id}</h3>
-			<div class="js-accordion__panel content" id="${id}" data-id="${item.id}">
+    mDisplay += (
+      `<h3 class="js-accordion__header">${id}: ${item.land_name} - ${item.attraction_name}</h3>
+			<div class="js-accordion__panel content" id="${id}" data-id="${id}">
 				<form>
           <div class="js-hospitalizations">
-            <label for="park"><h4>Park:</h4></label>
-            <p>${item.park_name}</p>
+            <label for="park"><h4 class="mickey-display-inline">Park:</h4></label>
+            <p class="park mickey-display-inline">${item.park_name}</p>
             <select name="park" title="park">
               <option value="none">Change Park</option>
 							<option value="1">Disneyland</option>
               <option value="2">California Adventure</option>
               <option value="3">Downtown Disney</option>
-            </select>
-            <label for="land"><h4>Land:</h4></label>
-            <p>${item.land_name}</p>
+            </select><br>
+            <label for="land"><h4 class="mickey-display-inline">Land:</h4></label>
+            <p class="land mickey-display-inline">${item.land_name}</p>
             <select name="land" title="land">
-              <option value="${item.land_id}">${item.land_id}</option>
-            </select> 
-            <label for="attraction"><h4>Attraction:</h4></label>
-            <p>${item.attraction_name}</p>
+              <option value="none">Change Land</option>
+            </select><br> 
+            <label for="attraction"><h4 class="mickey-display-inline">Attraction:</h4></label>
+            <p class="attraction mickey-display-inline">${item.attraction_name}</p>
             <select name="attraction" title="attraction">
-              <option value="${item.attraction_id}">${item.attraction_id}</option>
+              <option value="none">Change Attraction</option>
             </select>                        
 						<h4>Description</h4>
 						<p class="description">${item.description}</p>
@@ -47,12 +46,12 @@ function displayMickeyData(data) {
   });
   //adds accordion on initial page load
   if ($('.h-container').is(':empty')) {
-    $('.h-container').html(hDisplay);
+    $('.h-container').html(mDisplay);
     $('#accordion').accordion({collapsible: true, active: 'none', heightStyle: 'content'});
   }
   //refreshes accordion if page if one is already there
   else {
-    $('.h-container').append(hDisplay);
+    $('.h-container').append(mDisplay);
     $('.h-container').accordion('refresh');
   }
 }
@@ -64,16 +63,6 @@ function addSelected(parkId, n) {
   if (parkId === n) {
     return selected;
   }
-}
-
-function checkIfConscious(item) {
-  var conscious;
-  if (item.conscious) {
-    conscious = 'yes';
-  } else {
-    conscious = 'no';
-  }
-  return conscious;
 }
 
 //GET mickeys
@@ -94,7 +83,7 @@ function createSubmitButton(i) {
 
 //pushes the new data to the hospitalization collection
 //then adds that document to the hospitalization accordion
-function listenForHospitalization() {
+function listenForMickey() {
   $('form').submit(function(e) {
     e.preventDefault();
 
@@ -134,33 +123,30 @@ function whenSubmitButtonIsClicked() {
     var conscious;
     var consciousField;
     var form = $(this).parents('form');
-    var objectForHospitalizations = {
+    var objectForMickey = {
       id: form.parents('div').attr('data-id'),
-      latestUpdate: form.children('.js-hospitalizations').find('input#status').val(),
-      conscious: undefined
+      description: form.children('.js-hospitalizations').find('input#description').val(),
+      hint: form.children('.js-hospitalizations').find('input#hint').val(),
+      photo_url: form.children('.js-hospitalizations').find('input#photo-url').val(),
+      park_id: parseInt(form.children('.js-hospitalizations').find('select[name="park"]').val()),
+      land_id: parseInt(form.children('.js-hospitalizations').find('select[name="land"]').val()),
+      attraction_id: parseInt(form.children('.js-hospitalizations').find('select[name="attraction"]').val())
     };
-    consciousField = form.children('.js-hospitalizations').find('select[name=conscious]').val();
-    conscious = form.children('.js-hospitalizations').find('.conscious').text();
-    //only adds conscious to object if user changed answer
-    if (consciousField !== conscious) {
-      consciousField = (consciousField === 'yes') ? true : false;
-      objectForHospitalizations.conscious = consciousField;
-    }
-    updateHospitalization(objectForHospitalizations);
+    updateMickey(objectForMickey);
 		
   });
 }
 
-function updateHospitalization(object) {
+function updateMickey(object) {
   var toUpdate = {};
   for (var item in object) {
-    if (object[item] !== undefined && object[item] !== '') {
+    if (object[item] !== 'none' && object[item] !== '') {
       toUpdate[item] = object[item];
     }
   }
   if (Object.keys(toUpdate).length > 1) {
     //updates DOM with new data
-    hUpdateDom(toUpdate);
+    mUpdateDom(toUpdate);
 
     $.ajax({
       url: `hospitalizations/${toUpdate.id}`,
@@ -173,16 +159,21 @@ function updateHospitalization(object) {
 }
 
 //only run if a PUT request is being made
-function hUpdateDom(object) {
+//TODO: Add park, land and attraction names
+function mUpdateDom(object) {
   var target = $(`#${object.id}`).children('form');
-  if (object.latestUpdate) {
-    target.children('.status').text(object.latestUpdate);
+  if (object.description) {
+    target.children('.description').text(object.description);
     target.children('input').val('');
   }
-  if ('conscious' in object) {
-    var conscious = checkIfConscious(object);
-    target.children('.conscious').text(conscious);
+  if (object.hint) {
+    target.children('.hint').text(object.hint);
+    target.children('input').val('');
   }
+  if (object.photo_url) {
+    target.children('.photo-url').text(object.photo_url);
+    target.children('input').val('');
+  } 
 }
 
 function displayAttractionOptions(data) {
@@ -238,6 +229,6 @@ $(function() {
   getMickeys(displayMickeyData);
   listenForParkChanges();
   listenForLandChanges();
-  listenForHospitalization();
+  listenForMickey();
   whenSubmitButtonIsClicked();
 });
