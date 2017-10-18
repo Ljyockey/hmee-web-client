@@ -11,7 +11,7 @@ function displayMickeyData(data) {
       `<h3 class="js-accordion__header">${id}: ${item.land_name} - ${item.attraction_name}</h3>
 			<div class="js-accordion__panel content" id="${id}" data-id="${id}">
 				<form>
-          <div class="js-hospitalizations">
+          <div class="js-mickeys">
             <label for="park"><h4 class="mickey-display-inline">Park:</h4></label>
             <p class="park mickey-display-inline">${item.park_name}</p>
             <select name="park" title="park">
@@ -89,12 +89,12 @@ function listenForMickey() {
 
     //create new object to push to array
     var newEntry = {
-      "description": $('input[name="description"]').val(),
-      "hint": $('input[name="hint"]').val(),
-      "photo_url": $('textarea[name="photo-url"]').val(),
-      "park_id": $('select[name="park"]').value === 'none' ? null : parseInt($('select[name="park"]').val()),
-      "land_id": $('select[name="land"]').value === 'none' ? null : parseInt($('select[name="land"]').val()),
-      "attraction_id": $('select[name="attraction"]').value === 'none' ? null : parseInt($('select[name="attraction"]').val())
+      'description': $('input[name="description"]').val(),
+      'hint': $('input[name="hint"]').val(),
+      'photo_url': $('textarea[name="photo-url"]').val(),
+      'park_id': $('select[name="park"]').value === 'none' ? null : parseInt($('select[name="park"]').val()),
+      'land_id': $('select[name="land"]').value === 'none' ? null : parseInt($('select[name="land"]').val()),
+      'attraction_id': $('select[name="attraction"]').value === 'none' ? null : parseInt($('select[name="attraction"]').val())
     };
 
     //adds new object to hospitalization collection
@@ -107,7 +107,7 @@ function listenForMickey() {
         var newPost = {
           mickeys: [data.mickey]
         };
-        return $('.js-hospitalizations').append(displayMickeyData(newPost));
+        return $('.js-mickeys').append(displayMickeyData(newPost));
       },
       dataType: 'json',
       contentType: 'application/json'
@@ -125,12 +125,12 @@ function whenSubmitButtonIsClicked() {
     var form = $(this).parents('form');
     var objectForMickey = {
       id: form.parents('div').attr('data-id'),
-      description: form.children('.js-hospitalizations').find('input#description').val(),
-      hint: form.children('.js-hospitalizations').find('input#hint').val(),
-      photo_url: form.children('.js-hospitalizations').find('input#photo-url').val(),
-      park_id: parseInt(form.children('.js-hospitalizations').find('select[name="park"]').val()),
-      land_id: parseInt(form.children('.js-hospitalizations').find('select[name="land"]').val()),
-      attraction_id: parseInt(form.children('.js-hospitalizations').find('select[name="attraction"]').val())
+      description: form.children('.js-mickeys').find('input#description').val(),
+      hint: form.children('.js-mickeys').find('input#hint').val(),
+      photo_url: form.children('.js-mickeys').find('input#photo-url').val(),
+      park_id: parseInt(form.children('.js-mickeys').find('select[name="park"]').val()),
+      land_id: parseInt(form.children('.js-mickeys').find('select[name="land"]').val()),
+      attraction_id: parseInt(form.children('.js-mickeys').find('select[name="attraction"]').val())
     };
     updateMickey(objectForMickey);
 		
@@ -149,11 +149,11 @@ function updateMickey(object) {
     mUpdateDom(toUpdate);
 
     $.ajax({
-      url: `hospitalizations/${toUpdate.id}`,
+      url: `${dbUrl}/mickeys/${toUpdate.id}`,
       method: 'PUT',
       data: JSON.stringify(toUpdate),
-    		dataType: 'json', 
-    		contentType: 'application/json'
+    	dataType: 'json', 
+    	contentType: 'application/json'
     });
   }
 }
