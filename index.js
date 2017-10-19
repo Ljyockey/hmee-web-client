@@ -57,15 +57,6 @@ function displayMickeyData(data) {
   }
 }
 
-function addSelected(parkId, n) {
-  //this adds the "selected" attribute to the correct option
-  //under park/land/attraction
-  var selected = 'selected';
-  if (parkId === n) {
-    return selected;
-  }
-}
-
 //GET mickeys
 function getMickeys(callback) {
   var query = {
@@ -133,12 +124,14 @@ function freshLandOrAttractionOption(type) {
 function whenSubmitButtonIsClicked() {
   $('.h-container').on('click', '.edit', function(e) {
     e.preventDefault();
-    var conscious;
-    var consciousField;
+    var selectionNames = {}
     var form = $(this).parents('form');
     var park = form.children('.js-mickeys').find('select[name="park"]').val();
+    selectionNames.park = form.children('.js-mickeys').find('select[name="park"] option:selected').text();
     var land = form.children('.js-mickeys').find('select[name="land"]').val();
+    selectionNames.land = form.children('.js-mickeys').find('select[name="land"] option:selected').text();
     var attraction = form.children('.js-mickeys').find('select[name="attraction"]').val();
+    selectionNames.attraction = form.children('.js-mickeys').find('select[name="attraction"] option:selected').text();
     var objectForMickey = {
       description: form.children('.js-mickeys').find('input#description').val(),
       hint: form.children('.js-mickeys').find('input#hint').val(),
@@ -147,7 +140,7 @@ function whenSubmitButtonIsClicked() {
       land_id: land === 'none' ? land : parseInt(land),
       attraction_id: attraction === 'none' ? attraction : parseInt(attraction)
     };
-    updateMickey(objectForMickey, form.parents('div').attr('data-id'));
+    updateMickey(objectForMickey, form.parents('div').attr('data-id'), selectionNames);
 
     //return everything to unedited state
     form.children('.js-mickeys').find('select[name="park"]').html(freshParkOptions());
@@ -160,7 +153,7 @@ function whenSubmitButtonIsClicked() {
   });
 }
 
-function updateMickey(object, id) {
+function updateMickey(object, id, selections) {
   var toUpdate = {};
   for (var item in object) {
     if (object[item] !== 'none' && object[item] !== '') {
@@ -169,7 +162,7 @@ function updateMickey(object, id) {
   }
   if (Object.keys(toUpdate).length > 0) {
     //updates DOM with new data
-    mUpdateDom(toUpdate);
+    mUpdateDom(toUpdate, id, selections);
 
     $.ajax({
       url: `${dbUrl}/mickeys/${id}`,
@@ -183,21 +176,30 @@ function updateMickey(object, id) {
 
 //only run if a PUT request is being made
 //TODO: Add park, land and attraction names
-function mUpdateDom(object) {
-  var target = $(`#${object.id}`).children('form');
+function mUpdateDom(object, id, selections) {
+  var target = $(`#${id}`).children('form');
   if (object.description) {
-    target.children('.description').text(object.description);
+    target.children('.js-mickeys').children('.description').text(object.description);
     target.children('input').val('');
   }
   if (object.hint) {
-    target.children('.hint').text(object.hint);
+    target.children('.js-mickeys').children('.hint').text(object.hint);
     target.children('input').val('');
   }
   if (object.photo_url) {
-    target.children('.photo-url').text(object.photo_url);
+    target.children('.js-mickeys').children('.photo-url').text(object.photo_url);
     target.children('img').attr('src', object.photo_url);
     target.children('input').val('');
   }
+  if (object.park_id) {
+    target.children('.js-mickeys').children('.park').text(selections.park);
+  }
+  if (object.land_id) {
+    target.children('.js-mickeys').children('.land').text(selections.land);
+  }
+  if (object.attraction_id) {
+    target.children('.js-mickeys').children('.attraction').text(selections.attraction);
+  }    
 }
 
 function getAttractionsByLandForForm(landId, element) {
