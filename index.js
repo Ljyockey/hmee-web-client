@@ -40,7 +40,8 @@ function displayMickeyData(data) {
 						<p class="photo-url">${item.photo_url}</p>
 						<input type="text" for="photo-url" id="photo-url" placeholder="edit photo URL"><br>            			
 					</div>
-					${createSubmitButton(item.id)}
+          ${createSubmitButton(item.id)}
+          <img src="${item.photo_url}" alt="photo of Mickey ${item.id}">
 				</form>
 				</div>`);
   });
@@ -116,6 +117,18 @@ function listenForMickey() {
   });
 }
 
+function freshParkOptions() {
+  return `<option value="none">Change Park</option>
+          <option value="1">Disneyland</option>
+          <option value="2">California Adventure</option>
+          <option value="3">Downtown Disney</option>`;
+}
+
+function freshLandOrAttractionOption(type) {
+  var t = type === 'land' ? 'Land' : 'Attraction';
+  return `<option value="none">Change ${t}</option>`;
+}
+
 //makes objects for PUT requests
 function whenSubmitButtonIsClicked() {
   $('.h-container').on('click', '.edit', function(e) {
@@ -123,33 +136,43 @@ function whenSubmitButtonIsClicked() {
     var conscious;
     var consciousField;
     var form = $(this).parents('form');
+    var park = form.children('.js-mickeys').find('select[name="park"]').val();
+    var land = form.children('.js-mickeys').find('select[name="land"]').val();
+    var attraction = form.children('.js-mickeys').find('select[name="attraction"]').val();
     var objectForMickey = {
-      id: form.parents('div').attr('data-id'),
       description: form.children('.js-mickeys').find('input#description').val(),
       hint: form.children('.js-mickeys').find('input#hint').val(),
       photo_url: form.children('.js-mickeys').find('input#photo-url').val(),
-      park_id: parseInt(form.children('.js-mickeys').find('select[name="park"]').val()),
-      land_id: parseInt(form.children('.js-mickeys').find('select[name="land"]').val()),
-      attraction_id: parseInt(form.children('.js-mickeys').find('select[name="attraction"]').val())
+      park_id: park === 'none' ? park : parseInt(park),
+      land_id: land === 'none' ? land : parseInt(land),
+      attraction_id: attraction === 'none' ? attraction : parseInt(attraction)
     };
-    updateMickey(objectForMickey);
+    updateMickey(objectForMickey, form.parents('div').attr('data-id'));
+
+    //return everything to unedited state
+    form.children('.js-mickeys').find('select[name="park"]').html(freshParkOptions());
+    form.children('.js-mickeys').find('select[name="land"]').html(freshLandOrAttractionOption('land'));
+    form.children('.js-mickeys').find('select[name="attraction"]').html(freshLandOrAttractionOption('attraction'));
+    form.children('.js-mickeys').find('input#description').val('');
+    form.children('.js-mickeys').find('input#hint').val('');
+    form.children('.js-mickeys').find('input#photo-url').val('');
 		
   });
 }
 
-function updateMickey(object) {
+function updateMickey(object, id) {
   var toUpdate = {};
   for (var item in object) {
     if (object[item] !== 'none' && object[item] !== '') {
       toUpdate[item] = object[item];
     }
   }
-  if (Object.keys(toUpdate).length > 1) {
+  if (Object.keys(toUpdate).length > 0) {
     //updates DOM with new data
     mUpdateDom(toUpdate);
 
     $.ajax({
-      url: `${dbUrl}/mickeys/${toUpdate.id}`,
+      url: `${dbUrl}/mickeys/${id}`,
       method: 'PUT',
       data: JSON.stringify(toUpdate),
     	dataType: 'json', 
@@ -172,54 +195,63 @@ function mUpdateDom(object) {
   }
   if (object.photo_url) {
     target.children('.photo-url').text(object.photo_url);
+    target.children('img').attr('src', object.photo_url);
     target.children('input').val('');
-  } 
+  }
 }
 
-function displayAttractionOptions(data) {
-  var oHtml = '<option value="none">None</option>';
-  data.attractions.forEach(function(attraction) {
-    oHtml += `<option value="${attraction.id}">${attraction.name}</option>`;
-  });
-  $('.js-form-attractions').html(oHtml);
-}
-
-function getAttractionsByLandForForm(landId, callback) {
+function getAttractionsByLandForForm(landId, element) {
   var query = {
     url: `${dbUrl}/lands/${landId}/attractions`,
     type: 'GET',
-    success: callback
+    success: function(data) {
+      var oHtml = '<option value="none">None</option>';
+      data.attractions.forEach(function(attraction) {
+        oHtml += `<option value="${attraction.id}">${attraction.name}</option>`;
+      });
+      element.html(oHtml);
+    }
   };
   $.ajax(query);
 }
 
 function listenForLandChanges() {
   $('.js-form-lands').change(function() {
-    getAttractionsByLandForForm(this.value, displayAttractionOptions);
+    getAttractionsByLandForForm(this.value, $('.js-form-attractions'));
   });
 }
 
-function displayLandOptions(data) {
-  var oHtml = '<option value="none">None</option>';
-  $('.js-form-attractions').html(oHtml);
-  data.lands.forEach(function(land) {
-    oHtml += `<option value="${land.id}">${land.name}</option>`;
-  });
-  $('.js-form-lands').html(oHtml);
-}
-
-function getLandsByParkForForm(parkId, callback) {
+function getLandsByParkForForm(parkId, element) {
   var query = {
     url: `${dbUrl}/parks/${parkId}/lands`,
     type: 'GET',
-    success: callback
+    success: function(data) {
+      var oHtml = '<option value="none">None</option>';
+      $('.js-form-attractions').html(oHtml);
+      data.lands.forEach(function(land) {
+        oHtml += `<option value="${land.id}">${land.name}</option>`;
+      });
+      element.html(oHtml);
+    }
   };
   $.ajax(query);
 }
 
 function listenForParkChanges() {
   $('.js-form-park').change(function() {
-    getLandsByParkForForm(this.value, displayLandOptions);
+    getLandsByParkForForm(this.value, $('.js-form-lands'));
+  });
+}
+
+function putRequestParkChangeListener() {
+  $('.h-container').on('change', 'select[name="park"]', function() {
+    getLandsByParkForForm(this.value, $(this).siblings('select[name="land"]'));
+  });
+}
+
+function putRequestLandChangeListener() {
+  $('.h-container').on('change', 'select[name="land"]', function() {
+    getAttractionsByLandForForm(this.value, $(this).siblings('select[name="attraction"]'));
   });
 }
 
@@ -229,6 +261,8 @@ $(function() {
   getMickeys(displayMickeyData);
   listenForParkChanges();
   listenForLandChanges();
+  putRequestParkChangeListener();
+  putRequestLandChangeListener();
   listenForMickey();
   whenSubmitButtonIsClicked();
 });
